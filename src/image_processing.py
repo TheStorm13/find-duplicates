@@ -1,5 +1,4 @@
 import logging
-import multiprocessing as mp
 import os
 from concurrent.futures import ThreadPoolExecutor
 
@@ -8,18 +7,9 @@ from PIL import Image
 from PIL import ImageFile
 
 from config import DUPLICATE_FOLDER, IMAGE_EXTENSIONS
+from src.utils import get_optimized_thread_count
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-
-
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format="%(asctime)s - %(levelname)s - %(message)s",
-#     handlers=[
-#         logging.FileHandler(LOG_FILE_PATH, mode='w'),
-#         logging.StreamHandler()
-#     ]
-# )
 
 
 class ImageProcessing:
@@ -31,7 +21,16 @@ class ImageProcessing:
             return directory
         else:
             logging.error(f"Такой папки не существует: {directory}")
+            print("Попробуйте снова.")
             self.input_directory()
+
+    def collect_images(self, directory):
+        for root, dirs, files in os.walk(directory):
+            if os.path.basename(root) == DUPLICATE_FOLDER:
+                continue
+            for file in files:
+                if file.lower().endswith(tuple(IMAGE_EXTENSIONS)):
+                    yield os.path.join(root, file)
 
     @staticmethod
     def calculate_image_hash(filename):
@@ -43,33 +42,22 @@ class ImageProcessing:
             logging.error(f"Ошибка при обработке изображения {filename}: {e}")
             return None
 
-    def load_directory(self):
-        path_images = []
-        hash_images = []
+    def process_images(self, path_images):
+        #todo: сделать асинхронную обработку
+        logging.info(f"Начато вычисление хэшей для {len(path_images)} изображений")
+        with ThreadPoolExecutor(max_workers=get_optimized_thread_count()) as pool:
+            hash_images = list(pool.map(self.calculate_image_hash, path_images))
+        return [h for h in hash_images if h is not None]
 
+    def load_directory(self):
         directory = self.input_directory()
         if not directory:
-            return directory, hash_images
+            return directory, [], []
 
-        for root, dirs, files in os.walk(directory):
+        path_images = list(self.collect_images(directory))
+        if not path_images:
+            logging.info("Нет изображений для обработки.")
+            return directory, [], []
 
-            if os.path.basename(root) == DUPLICATE_FOLDER:
-                continue
-            for file in files:
-                if file.lower().endswith(tuple(IMAGE_EXTENSIONS)):
-                    path_images.append(os.path.join(root, file))
-
-        count_image = len(path_images)
-        print(f"Найдено фотографий: {count_image}")
-        logging.info(f"Найдено изображений: {count_image}")
-
-        if count_image == 0:
-            return directory, path_images, hash_images
-
-        with ThreadPoolExecutor(max_workers=mp.cpu_count() + 4) as pool:
-            for hash_image in pool.map(self.calculate_image_hash, path_images):
-                hash_images.append(hash_image)
-
-            # hash_images.extend(pool.map(putHash, path_images))
-
+        hash_images = self.process_images(path_images)
         return directory, path_images, hash_images
