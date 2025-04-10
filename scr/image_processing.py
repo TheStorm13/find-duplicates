@@ -1,8 +1,7 @@
-import os
-import time
 import multiprocessing as mp
-from alive_progress import alive_bar
+import os
 from concurrent.futures import ThreadPoolExecutor
+
 import imagehash
 from PIL import Image
 from PIL import ImageFile
@@ -41,11 +40,11 @@ class ImageProcessing:
         print(f"Найдено фотографий: {count_image}")
         if count_image == 0:
             return directory, path_images, hash_images
-        with alive_bar(count_image, title="Подготавливаем фотографии   ") as bar:
-            with ThreadPoolExecutor(max_workers=mp.cpu_count() + 4) as pool:
-                for hash_image in pool.map(self.putHash, path_images):
-                    hash_images.append(hash_image)
-                    bar()
-                # hash_images.extend(pool.map(putHash, path_images))
+
+        with ThreadPoolExecutor(max_workers=mp.cpu_count() + 4) as pool:
+            for hash_image in pool.map(self.putHash, path_images):
+                hash_images.append(hash_image)
+
+            # hash_images.extend(pool.map(putHash, path_images))
 
         return directory, path_images, hash_images

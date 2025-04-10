@@ -1,10 +1,6 @@
-import os
-import time
 import multiprocessing as mp
-from alive_progress import alive_bar
-from concurrent.futures import ThreadPoolExecutor
-import imagehash
-from PIL import Image
+import time
+
 from PIL import ImageFile
 
 from duplication_handler import DuplicationHandler
