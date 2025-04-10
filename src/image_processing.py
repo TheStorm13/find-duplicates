@@ -1,3 +1,4 @@
+import logging
 import multiprocessing as mp
 import os
 from concurrent.futures import ThreadPoolExecutor
@@ -6,7 +7,19 @@ import imagehash
 from PIL import Image
 from PIL import ImageFile
 
+from config import DUPLICATE_FOLDER, IMAGE_EXTENSIONS
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format="%(asctime)s - %(levelname)s - %(message)s",
+#     handlers=[
+#         logging.FileHandler(LOG_FILE_PATH, mode='w'),
+#         logging.StreamHandler()
+#     ]
+# )
 
 
 class ImageProcessing:
@@ -14,9 +27,10 @@ class ImageProcessing:
     def input_directory(self):
         directory = input()
         if os.path.isdir(directory) or directory == '':
+            logging.info(f"Директория подтверждена: {directory}")
             return directory
         else:
-            print("Такой папки не существует. Попробуйте ввести еще раз или нажмите Enter, чтобы завершить программу.")
+            logging.error(f"Такой папки не существует: {directory}")
             self.input_directory()
 
     @staticmethod
@@ -26,23 +40,29 @@ class ImageProcessing:
                 image.draft('L', (32, 32))
                 return imagehash.dhash(image)
         except Exception as e:
-            print(f"Ошибка при обработке изображения {filename}: {e}")
+            logging.error(f"Ошибка при обработке изображения {filename}: {e}")
             return None
 
     def load_directory(self):
         path_images = []
         hash_images = []
+
         directory = self.input_directory()
-        if directory == '' or directory == None:
+        if not directory:
             return directory, hash_images
 
         for root, dirs, files in os.walk(directory):
+
+            if os.path.basename(root) == DUPLICATE_FOLDER:
+                continue
             for file in files:
-                if root != directory + r"\Duplicate" and file[-4:].lower() in (".jpg", "jpeg", ".png"):
-                    path_images.append(root + '\\' + file)
+                if file.lower().endswith(tuple(IMAGE_EXTENSIONS)):
+                    path_images.append(os.path.join(root, file))
 
         count_image = len(path_images)
         print(f"Найдено фотографий: {count_image}")
+        logging.info(f"Найдено изображений: {count_image}")
+
         if count_image == 0:
             return directory, path_images, hash_images
 
