@@ -34,4 +34,5 @@ class ImageCollector:
                 if file.lower().endswith(tuple(IMAGE_EXTENSIONS)):
                     path_images.append(os.path.join(root, file))
 
+        logging.info(f"Найдено изображений: {len(path_images)}")
         return path_images  # Возвращаем собранный список
