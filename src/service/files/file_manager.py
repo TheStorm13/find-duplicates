@@ -1,7 +1,7 @@
 import logging
 import os
 
-from config import METADATA_FILE_NAME, DUPLICATE_FOLDER
+from src.config import METADATA_FILE_NAME, DUPLICATE_FOLDER
 from src.service.files.metadata_manager import MetadataManager
 
 

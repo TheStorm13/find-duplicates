@@ -1,7 +1,7 @@
 import logging
 import os
 
-from config import LOG_FILE_PATH  # Берем путь для логов из config.py
+from src.config import LOG_FILE_PATH  # Берем путь для логов из config.py
 
 
 class LoggingPath:

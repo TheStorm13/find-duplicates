@@ -2,7 +2,7 @@ import imagehash
 
 from src.service.duplication_handler import DuplicationHandler
 from src.service.files.file_manager import FileManager
-from src.service.image_collector import ImageCollector
+from src.service.files.image_collector import ImageCollector
 from src.service.image_processing import ImageProcessing
 
 
