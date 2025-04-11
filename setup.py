@@ -7,10 +7,11 @@ setup(
     install_requires=[
         "click",
         "Pillow",
+        "imagehash",
     ],
     entry_points={
         "console_scripts": [
-            "image-cli=cli.main_cli:ImageCLI.cli",  # Привязка команды `image-cli` к классу.
+            "find-duplicate=cli.main_cli:ImageCLI.cli",  # Привязка команды `image-cli` к классу.
         ],
     },
 )
