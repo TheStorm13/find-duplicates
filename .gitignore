@@ -1,5 +1,8 @@
 #
 .venv
 
+#
+find_duplicate.egg-info
+
 #Logs
 *.log
