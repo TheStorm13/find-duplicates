@@ -27,14 +27,14 @@ find-duplicate [COMMAND] [OPTIONS]
     - Рекурсивно сканирует указанную директорию `DIRECTORY` и все её поддиректории, находит дубликаты изображений путём вычисления хэшей файлов, затем перемещает найденные дубликаты в отдельную папку.
     - Пример:
       ```bash
-      find-duplicate find_dupl /путь/к/вашей/директории
+      find-duplicate find_dupl "C:\Users\user\Pictures"
       ```
 
 - **return_dupl DIRECTORY**
     - Возвращает ранее перемещённые дубликаты в исходные директории.
     - Пример:
       ```bash
-      find-duplicate return_dupl /путь/к/вашей/директории
+      find-duplicate return_dupl "C:\Users\user\Pictures"
       ```
 ---
 
