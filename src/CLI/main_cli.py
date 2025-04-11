@@ -33,7 +33,7 @@ def find_dupl(directory):
         return
 
     # Вычисление хэшей изображений
-    image_hashes = image_service.calculate_hash(path_images)
+    image_hashes = image_service.calculate_hashes(path_images)
 
     # Поиск дубликатов
     duplicates = image_service.find_duplicates(image_hashes)

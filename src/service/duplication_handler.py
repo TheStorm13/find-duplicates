@@ -22,8 +22,6 @@ class DuplicationHandler:
         return result
         # return (hash_1 - hash_2)<10
 
-
-
     def find_duplicates(self, image_hashes: dict[str, imagehash.ImageHash]) -> list[str]:
         """
         Поиск дубликатов на основе хэшей изображений.
@@ -46,4 +44,3 @@ class DuplicationHandler:
 
         logging.info(f"Обнаружено {len(duplicate_paths)} дубликатов")
         return duplicate_paths
-

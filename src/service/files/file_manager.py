@@ -1,5 +1,6 @@
-import os
 import logging
+import os
+
 from config import METADATA_FILE_NAME, DUPLICATE_FOLDER
 from src.service.files.metadata_manager import MetadataManager
 
@@ -49,7 +50,7 @@ class FileManager:
         for duplicate_path in duplicates:
             self.move_file(duplicate_path, duplicate_dir)
             file_name = os.path.basename(duplicate_path)
-            original_paths[os.path.join(duplicate_dir, file_name) ] = duplicate_path
+            original_paths[os.path.join(duplicate_dir, file_name)] = duplicate_path
         logging.info(f"Дубликаты успешно перемещены в директорию: {duplicate_dir}")
 
         # Сохраняем информацию об исходных путях для возврата

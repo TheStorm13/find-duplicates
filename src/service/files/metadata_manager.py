@@ -12,7 +12,6 @@ class MetadataManager:
         """
         self.metadata_file = metadata_file
 
-
     def metadata_exists(self) -> bool:
         """
         Проверяет существование файла метаданных.
@@ -33,6 +32,7 @@ class MetadataManager:
                 logging.error(f"Ошибка при очистке файла метаданных {self.metadata_file}: {e}")
         else:
             logging.info(f"Файл метаданных {self.metadata_file} не существует. Очистка не требуется.")
+
     def save_metadata(self, metadata: dict) -> None:
         """
         Сохраняет метаданные в файл.
@@ -64,5 +64,3 @@ class MetadataManager:
         except Exception as e:
             logging.error(f"Ошибка при загрузке метаданных из {self.metadata_file}: {e}")
             return {}
-
-

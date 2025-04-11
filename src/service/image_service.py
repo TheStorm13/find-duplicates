@@ -55,5 +55,3 @@ class ImageService:
         """
         self.base_directory = base_directory
         self.file_manager.return_duplicates(self.base_directory)
-
-

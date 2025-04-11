@@ -18,7 +18,6 @@ logging.basicConfig(
 )
 
 if __name__ == "__main__":
-
     # Запуск CLI.
     cli()
 
