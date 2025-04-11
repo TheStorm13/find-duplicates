@@ -1,4 +1,4 @@
 Pillow
 imagehash
 click
-imagehash
+psutil
