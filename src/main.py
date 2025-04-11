@@ -3,7 +3,7 @@ import logging
 from PIL import ImageFile
 
 from config import LOG_FILE_PATH
-from src.UI.CLI.main_cli import cli
+from src.CLI.main_cli import cli
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
