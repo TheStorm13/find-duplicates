@@ -27,13 +27,13 @@ class ImageService:
             path_images = self.image_collector.collect_images(self.base_directory)
             return path_images
 
-    def calculate_hash(self, path_images):
+    def calculate_hashes(self, path_images):
         """
         Вычисляет хэш изображений.
         :param path_images: Путь к изображению.
         :return: Хэш изображения.
         """
-        return self.image_processing.process_images(path_images)
+        return self.image_processing.calculate_hashes_multithreaded(path_images)
 
     def find_duplicates(self, image_hashes: dict[str, imagehash.ImageHash]) -> list[str]:
         """
@@ -55,3 +55,5 @@ class ImageService:
         """
         self.base_directory = base_directory
         self.file_manager.return_duplicates(self.base_directory)
+
+
