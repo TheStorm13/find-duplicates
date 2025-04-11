@@ -15,13 +15,6 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 class ImageProcessing:
 
     def calculate_image_hash(self, image_path):
-        # try:
-        #     with Image.open(filename) as image:
-        #         image.draft('L', (32, 32))
-        #         return imagehash.dhash(image)
-        # except Exception as e:
-        #     logging.error(f"Ошибка при обработке изображения {filename}: {e}")
-        #     return None
         try:
             with Image.open(image_path) as image:
                 image.draft('L', (32, 32))
@@ -41,11 +34,16 @@ class ImageProcessing:
 
         logging.info(f"Начато вычисление хэшей для {len(image_paths)} изображений")
 
-
         # Оптимальное количество потоков
         max_workers = get_optimized_thread_count()
-        with ThreadPoolExecutor(max_workers=max_workers) as pool:
-            hash_images = list(pool.map(self.calculate_image_hash, image_paths))
+
+        with click.progressbar(image_paths, length=len(image_paths), show_eta=True,
+                               label='Обработка изображений') as bar:
+            with ThreadPoolExecutor(max_workers=max_workers) as pool:
+                hash_images = []
+                for result in pool.map(self.calculate_image_hash, image_paths):
+                    hash_images.append(result)
+                    bar.update(1)
 
         # Формирование словаря из успешных результатов
         return {path: hash_value for path, hash_value in hash_images if hash_value is not None}
