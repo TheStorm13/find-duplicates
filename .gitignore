@@ -1,8 +1,33 @@
-#
-.venv
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-#
-find_duplicate.egg-info
+# Distribution / packaging
+dist/
+build/
+reports/
+*.egg-info/
+*.spec
 
-#Logs
+# Virtual environments
+venv/
+env/
+.env/
+.venv/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local configuration
+.env
+config_local.py
+TODO.md
+RELEASE/RELEASE_NOTES.md
+
+# Logs and databases
 *.log
+log/

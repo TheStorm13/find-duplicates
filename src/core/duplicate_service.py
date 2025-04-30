@@ -1,12 +1,12 @@
 import imagehash
 
-from src.service.duplication_handler import DuplicationHandler
-from src.service.files.file_manager import FileManager
-from src.service.files.image_collector import ImageCollector
-from src.service.image_processing import ImageProcessing
+from src.core.image_prossesing.duplication_handler import DuplicationHandler
+from src.core.storage.file_manager import FileManager
+from src.core.storage.image_collector import ImageCollector
+from src.core.image_prossesing.image_processing import ImageProcessing
 
 
-class ImageService:
+class DuplicateService:
     """Сервис для обработки изображений и управления бизнес-логикой."""
 
     def __init__(self):

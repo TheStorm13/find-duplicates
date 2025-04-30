@@ -2,7 +2,7 @@ import logging
 import os
 
 from src.config import METADATA_FILE_NAME, DUPLICATE_FOLDER
-from src.service.files.metadata_manager import MetadataManager
+from src.core.storage.metadata_manager import MetadataManager
 
 
 class FileManager:
@@ -19,7 +19,7 @@ class FileManager:
         logging.info(f"Создана директория для дубликатов: {duplicate_dir}")
         return duplicate_dir
 
-    def move_file(self, src_path: str, dst_dir: str) -> None:
+    def _move_file(self, src_path: str, dst_dir: str) -> None:
         """
         Перемещает файл из src_path в указанную директорию.
 
@@ -48,7 +48,7 @@ class FileManager:
         original_paths = {}
 
         for duplicate_path in duplicates:
-            self.move_file(duplicate_path, duplicate_dir)
+            self._move_file(duplicate_path, duplicate_dir)
             file_name = os.path.basename(duplicate_path)
             original_paths[os.path.join(duplicate_dir, file_name)] = duplicate_path
         logging.info(f"Дубликаты успешно перемещены в директорию: {duplicate_dir}")
@@ -56,7 +56,8 @@ class FileManager:
         # Сохраняем информацию об исходных путях для возврата
         metadata_manager.save_metadata(original_paths)
 
-    def return_file_to_original_location(self, current_path: str, original_path: str) -> None:
+    # todo: есть метод для перемещения до этого
+    def _return_file_to_original_location(self, current_path: str, original_path: str) -> None:
         """
         Возвращает дубликат на его исходное место.
 
@@ -76,6 +77,9 @@ class FileManager:
 
         except Exception as e:
             logging.error(f"Ошибка при возврате файла {current_path} в {original_path}: {e}")
+
+    # todo: есть метод для перемещения нескольких файлов.
+    # todo: нужно написать еще один уровень абстракции для перемещения дубликатов и при поиске дубликатов
 
     def return_duplicates(self, base_directory: str) -> None:
         """
@@ -97,7 +101,7 @@ class FileManager:
         # Возвращаем файлы
         for current_path, original_path in original_paths.items():
             if os.path.exists(current_path):
-                self.return_file_to_original_location(current_path, original_path)
+                self._return_file_to_original_location(current_path, original_path)
             else:
                 logging.warning(f"Файл {current_path} отсутствует в папке дубликатов. Пропускаю.")
 
