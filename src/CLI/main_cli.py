@@ -1,10 +1,12 @@
+import os
+
 import click
 
+from src.core.duplicate_service import DuplicateService
 from src.logs.logging_path import LoggingPath
-from src.service.image_service import ImageService
 
 LoggingPath.ensure_log_directory_exists()
-image_service = ImageService()
+image_service = DuplicateService()
 
 
 @click.group()
@@ -19,13 +21,16 @@ def cli():
 
 
 @cli.command()
-@click.argument('directory', type=click.Path(exists=True))
+@click.argument('directory', required=False, type=click.Path(exists=True))
 def find_dupl(directory):
     """
     Найти и переместить дубликаты изображений.
 
     DIRECTORY - Путь к директории, где будут найдены дубликаты.
     """
+    # todo: добавить уровень абстракции
+    if directory is None:
+        directory = os.getcwd()
 
     # Сканирование директории
     path_images = image_service.scan_directory(directory)
