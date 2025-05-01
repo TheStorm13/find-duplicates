@@ -2,92 +2,78 @@ import logging
 import os
 
 from src.config import METADATA_FILE_NAME, DUPLICATE_FOLDER
+from src.core.model.replace_file import ReplaceFile
 from src.core.storage.metadata_manager import MetadataManager
 
 
 class FileManager:
-    def create_duplicate_dir(self, base_directory: str) -> str:
+    def __init__(self, root_directory: str):
+        self.root_directory = root_directory
+
+
+    @staticmethod
+    def get_base_directory():
+        # todo: проверить выдает ли директорию, откуда вызывается скрипт
+        return os.getcwd()
+
+    @staticmethod
+    def check_directory(directory):
+        if not directory or not os.path.isdir(directory):
+            logging.error(f"Такой папки не существует: {directory}")
+            return False
+        logging.info(f"Директория найдена: {directory}")
+        return True
+
+    @staticmethod
+    def create_directory(directory_path: str, directory_name: str) -> str:
         """
         Создаёт папку для дубликатов, если она ещё не существует.
 
-        :param base_directory: Базовая директория.
+        :param directory_path: Базовая директория.
         :return: Путь к созданной или уже существующей директории.
         """
-
-        duplicate_dir = os.path.join(base_directory, DUPLICATE_FOLDER)
+        # todo: проверка на существование директории и папки, которую хотим создать
+        duplicate_dir = os.path.join(directory_path, directory_name)
         os.makedirs(duplicate_dir, exist_ok=True)
-        logging.info(f"Создана директория для дубликатов: {duplicate_dir}")
+        logging.info(f"Создана директория: {directory_name}")
         return duplicate_dir
 
-    def _move_file(self, src_path: str, dst_dir: str) -> None:
-        """
-        Перемещает файл из src_path в указанную директорию.
-
-        :param src_path: Путь к исходному файлу.
-        :param dst_dir: Путь к директории назначения.
-        """
-
+    def _move_file(self, replace_file: ReplaceFile) -> None:
+        src = os.path.join(replace_file.old_file_path, replace_file.file_name)
+        dst = os.path.join(replace_file.new_file_path, replace_file.file_name)
         try:
-            filename = os.path.basename(src_path)
-            dst_path = os.path.join(dst_dir, filename)
-            os.replace(src_path, dst_path)
-            logging.debug(f"Файл {src_path} перемещён в {dst_path}")
+            if os.path.exists(dst):
+                logging.error(f"Файл {replace_file.file_name} уже существует.")
+                raise FileExistsError
+
+            os.replace(src, dst)
+            logging.debug(
+                f"Файл {replace_file} перемещён "
+                f"из {replace_file.old_file_path} в {replace_file.new_file_path}")
         except Exception as e:
-            logging.error(f"Ошибка при перемещении файла {src_path} в {dst_dir}: {e}")
+            logging.error(
+                f"Ошибка при перемещении файла {replace_file} "
+                f"из {replace_file.old_file_path} в {replace_file.new_file_path}: {e}")
 
-    def move_duplicates(self, base_directory: str, duplicates: list[str]) -> None:
-        """
-        Перемещает дубликаты в указанную директорию.
 
-        :param duplicates: Словарь с группами дубликатов.
-        :param duplicate_dir: Директория для хранения дубликатов.
-        """
-        duplicate_dir = self.create_duplicate_dir(base_directory)
+    def move_files(self, list_replaces: list[ReplaceFile]) -> None:
 
-        metadata_manager = MetadataManager(os.path.join(duplicate_dir, METADATA_FILE_NAME))
-        original_paths = {}
+        metadata_manager = MetadataManager(os.path.join(self.root_directory, METADATA_FILE_NAME))
+        for replace_file in list_replaces:
+            self._move_file(replace_file)
 
-        for duplicate_path in duplicates:
-            self._move_file(duplicate_path, duplicate_dir)
-            file_name = os.path.basename(duplicate_path)
-            original_paths[os.path.join(duplicate_dir, file_name)] = duplicate_path
-        logging.info(f"Дубликаты успешно перемещены в директорию: {duplicate_dir}")
+        metadata_manager.save_metadata(list_replaces)
 
-        # Сохраняем информацию об исходных путях для возврата
-        metadata_manager.save_metadata(original_paths)
-
-    # todo: есть метод для перемещения до этого
-    def _return_file_to_original_location(self, current_path: str, original_path: str) -> None:
-        """
-        Возвращает дубликат на его исходное место.
-
-        :param current_path: Текущий путь файла в папке дубликатов.
-        :param original_path: Исходный путь файла.
-        """
-        try:
-            # Проверка, существует ли файл на оригинальном пути
-            if os.path.exists(original_path):
-                logging.warning(f"Файл {original_path} уже существует. Добавляю суффикс '_duplicate'.")
-                base, ext = os.path.splitext(original_path)
-                original_path = f"{base}_duplicate{ext}"
-
-            # Перемещаем файл обратно
-            os.replace(current_path, original_path)
-            logging.debug(f"Файл {current_path} возвращён в {original_path}")
-
-        except Exception as e:
-            logging.error(f"Ошибка при возврате файла {current_path} в {original_path}: {e}")
 
     # todo: есть метод для перемещения нескольких файлов.
     # todo: нужно написать еще один уровень абстракции для перемещения дубликатов и при поиске дубликатов
-
     def return_duplicates(self, base_directory: str) -> None:
         """
         Возвращает все дубликаты из папки для дубликатов обратно в их исходные директории.
 
         :param duplicates_folder: Папка, где хранятся дубликаты.
         """
-        duplicate_dir = os.path.join(base_directory, "Duplicate")
+        duplicate_dir = os.path.join(base_directory, DUPLICATE_FOLDER)
         metadata_manager = MetadataManager(os.path.join(duplicate_dir, METADATA_FILE_NAME))
 
         # Проверяем, существуют ли метаданные
@@ -96,14 +82,11 @@ class FileManager:
             return
 
         # Загрузка метаданных
-        original_paths = metadata_manager.load_metadata()
-        logging.info("Будет возвращено %d файлов.>", len(original_paths))
+        replace_files: list[ReplaceFile] = metadata_manager.load_metadata()
+        logging.info("Будет возвращено %d файлов.>", len(replace_files))
         # Возвращаем файлы
-        for current_path, original_path in original_paths.items():
-            if os.path.exists(current_path):
-                self._return_file_to_original_location(current_path, original_path)
-            else:
-                logging.warning(f"Файл {current_path} отсутствует в папке дубликатов. Пропускаю.")
+        for replace_file in replace_files:
+            self._move_file(replace_file)
 
         logging.info("Все возможные дубликаты возвращены на исходные позиции.")
 

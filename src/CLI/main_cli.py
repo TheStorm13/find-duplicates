@@ -2,7 +2,7 @@ import os
 
 import click
 
-from src.core.duplicate_service import DuplicateService
+from src.core.controller.duplicate_service import DuplicateService
 from src.logs.logging_path import LoggingPath
 
 LoggingPath.ensure_log_directory_exists()
