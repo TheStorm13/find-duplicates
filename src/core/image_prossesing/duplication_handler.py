@@ -1,11 +1,11 @@
 import logging
-import os
 from collections import defaultdict
+from pathlib import Path
 
 import imagehash
 from PIL import ImageFile
 
-from src.core.model.image_data import ImageData
+from core.model.image_data import ImageData
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -26,7 +26,7 @@ class DuplicationHandler:
         return result
         # return (hash_1 - hash_2)<10
 
-    def find_duplicates(self, images: list[ImageData]) -> list:
+    def find_duplicates(self, images: list[ImageData]) -> list[Path]:
         """
         Поиск дубликатов на основе хэшей изображений.
 

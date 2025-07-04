@@ -3,7 +3,8 @@ from setuptools import setup, find_packages
 setup(
     name="find-duplicate",
     version="1.0",
-    packages=find_packages(),
+    packages=find_packages(where="src"),  # Ищем пакеты только в src
+    package_dir={"": "src"},             # Указываем, что корень пакетов - src
     install_requires=[
         "click",
         "Pillow",
@@ -12,7 +13,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "find-duplicate=src.main:cli",
+            "find-duplicate=cli.cli:cli",
         ],
     },
 )

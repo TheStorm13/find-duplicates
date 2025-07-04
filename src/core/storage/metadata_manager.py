@@ -1,13 +1,13 @@
 import json
 import logging
-import os
 from dataclasses import asdict
+from pathlib import Path
 
-from src.core.model.replace_file import ReplaceFile
+from core.model.replace_file import ReplaceFile
 
 
 class MetadataManager:
-    def __init__(self, metadata_path: str):
+    def __init__(self, metadata_path: Path):
         """
         Инициализация менеджера для работы с метаданными.
 
@@ -22,7 +22,7 @@ class MetadataManager:
 
         :return: True, если файл метаданных существует, иначе False.
         """
-        return os.path.exists(self.metadata_path)
+        return self.metadata_path.exists()
 
     def clean_metadata(self):
         """
@@ -30,7 +30,7 @@ class MetadataManager:
         """
         if self.metadata_exists():
             try:
-                os.remove(self.metadata_path)
+                self.metadata_path.unlink()
                 logging.info(f"Файл метаданных {self.metadata_path} очищен.")
             except Exception as e:
                 logging.error(f"Ошибка при очистке файла метаданных {self.metadata_path}: {e}")
@@ -40,12 +40,16 @@ class MetadataManager:
     def save_metadata(self, replace_files: list[ReplaceFile]) -> None:
         """
         Сохраняет метаданные в файл.
-
-        :param replace_file: Словарь метаданных для сохранения.
         """
         try:
-            # Convert the list of ReplaceFile objects to a list of dictionaries
-            data_to_save = [asdict(rf) for rf in replace_files]
+            # Convert ReplaceFile objects to dicts and convert Path objects to strings
+            def serialize_replace_file(rf: ReplaceFile):
+                data = asdict(rf)
+                data['old_file_path'] = str(data['old_file_path'])
+                data['new_file_path'] = str(data['new_file_path'])
+                return data
+
+            data_to_save = [serialize_replace_file(rf) for rf in replace_files]
 
             with open(self.metadata_path, "w", encoding="utf-8") as file:
                 json.dump(data_to_save, file, indent=4, ensure_ascii=False)
@@ -56,19 +60,20 @@ class MetadataManager:
     def load_metadata(self) -> list[ReplaceFile]:
         """
         Загружает метаданные из файла.
-
-        :return: Словарь метаданных.
+        :return: Список объектов ReplaceFile.
         """
-        #todo: errors
         if not self.metadata_exists():
             logging.warning(f"Metadata file '{self.metadata_path}' not found.")
-            return None
+            return []
 
         try:
             with open(self.metadata_path, "r", encoding="utf-8") as file:
-                # Deserialize JSON content to a list of ReplaceFile objects
                 data = json.load(file)
-                replace_files = [ReplaceFile(**item) for item in data]
+                replace_files = []
+                for item in data:
+                    item['old_file_path'] = Path(item['old_file_path'])
+                    item['new_file_path'] = Path(item['new_file_path'])
+                    replace_files.append(ReplaceFile(**item))
                 logging.info(f"Metadata has been successfully loaded from '{self.metadata_path}'.")
                 return replace_files
         except json.JSONDecodeError as e:
@@ -76,5 +81,4 @@ class MetadataManager:
         except Exception as e:
             logging.error(f"Error while loading metadata from '{self.metadata_path}': {e}")
 
-        return None
-
+        return []

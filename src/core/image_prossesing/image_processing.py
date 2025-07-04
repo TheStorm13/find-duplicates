@@ -7,8 +7,8 @@ import imagehash
 from PIL import Image
 from PIL import ImageFile
 
-from src.core.model.image_data import ImageData
-from src.utils import get_optimized_thread_count
+from core.model.image_data import ImageData
+from utils import get_optimized_thread_count
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 

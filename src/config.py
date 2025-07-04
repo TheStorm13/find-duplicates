@@ -1,11 +1,15 @@
-# config.py
-import os
+from pathlib import Path
+from typing import List, Final
 
-# Автоматически определяем корень проекта
-#todo: костыль для корня проекта и логов дальше
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+# Определение корня проекта (более надежный способ)
+PROJECT_ROOT: Final[Path] = Path(__file__).parent.resolve()
 
-LOG_FILE_PATH = os.path.join(PROJECT_ROOT, 'logs', 'app.log')
-DUPLICATE_FOLDER = "Duplicate"
-METADATA_FILE_NAME = "duplicates_metadata.json"
-IMAGE_EXTENSIONS = [".jpg", "jpeg", ".png"]
+# Пути к файлам и директориям
+LOG_DIR: Final[Path] = PROJECT_ROOT / "logs"
+LOG_FILE_PATH: Final[Path] = LOG_DIR / "app.log"
+DUPLICATE_FOLDER: Final[str] = "Duplicate"
+METADATA_FILE_NAME: Final[str] = "duplicates_metadata.json"
+IMAGE_EXTENSIONS: Final[List[str]] = [".jpg", ".jpeg", ".png"]
+
+# Создаем директорию для логов, если она не существует
+LOG_DIR.mkdir(exist_ok=True)
